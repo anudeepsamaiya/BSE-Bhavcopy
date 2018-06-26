@@ -25,11 +25,13 @@ class BSEParser(object):
         self.df = pd.read_csv(BSEParser.csvfile)
         self.data = self.df.T.loc[['SC_CODE','SC_NAME','OPEN','HIGH', 'LOW', 'CLOSE']].to_dict()
         for d in self.data.values():
-            r.hmset(d['SC_CODE'], d)
+            code, nm = d.get('SC_CODE'), d.get('SC_NAME')
+            key = '%s:%s' %(code, nm and nm.strip())
+            r.hmset(key, d)
 
     @cherrypy.expose
     def index(self):
-        return 'Hello'
+        return 'Hello inhabitants of Earth \V/'
 
     @cherrypy.expose
     def get_data(self):

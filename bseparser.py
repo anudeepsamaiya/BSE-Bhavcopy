@@ -27,6 +27,9 @@ def populate_data_into_redis(csv_file, date):
         key = '%s:%s' %(code, nm and nm.strip())
         r.hmset(key, d)
 
+def read_data_from_url(url)r:
+    return url
+
 
 class BSEParser(object):
 

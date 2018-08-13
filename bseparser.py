@@ -6,11 +6,8 @@ import pandas as pd
 import redis
 
 
-BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-r = redis.StrictRedis(host='localhost', port=6379, db=1)
 # jinja2 template renderer
 ENV  = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(BASE_DIR, 'templates')))
-
 
 def render_template(template, **context):
     global ENV
@@ -18,16 +15,20 @@ def render_template(template, **context):
     return template.render(context)
 
 
-class BSEParser(object):
-    csvfile = BASE_DIR + '/EQ060618_CSV/EQ060618.CSV'
+CSVFILE = BASE_DIR + '/EQ060618_CSV/EQ060618.CSV'
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
-    def __init__(self):
-        self.df = pd.read_csv(BSEParser.csvfile)
-        self.data = self.df.T.loc[['SC_CODE','SC_NAME','OPEN','HIGH', 'LOW', 'CLOSE']].to_dict()
-        for d in self.data.values():
-            code, nm = d.get('SC_CODE'), d.get('SC_NAME')
-            key = '%s:%s' %(code, nm and nm.strip())
-            r.hmset(key, d)
+def populate_data_into_redis(csv_file, date):
+    self.df = pd.read_csv(csv_file)
+    self.data = self.df.T.loc[['SC_CODE','SC_NAME','OPEN','HIGH', 'LOW', 'CLOSE']].to_dict()
+    for d in self.data.values():
+        code, nm = d.get('SC_CODE'), d.get('SC_NAME')
+        key = '%s:%s' %(code, nm and nm.strip())
+        r.hmset(key, d)
+
+
+class BSEParser(object):
 
     @cherrypy.expose
     def index(self):
@@ -35,12 +36,12 @@ class BSEParser(object):
 
     @cherrypy.expose
     def get_data(self):
-        return render_template('csvdump', data=self.data.values())
+        return render_template('csvdump', data=dict())
 
     @cherrypy.expose
     def find_scrip(self):
         csvdata = pd.read_csv(csvfile)
-        return render_template('csvdump', data=csvdata)
+        return render_template('csvdump', data=dict())
 
 
 if __name__=='__main__':

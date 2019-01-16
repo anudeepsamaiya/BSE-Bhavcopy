@@ -1,4 +1,6 @@
 CherryPy
-redispy
-pandas
 Jinja2
+celery
+hiredis
+pandas
+redispy

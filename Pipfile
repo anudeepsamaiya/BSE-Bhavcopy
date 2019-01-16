@@ -11,6 +11,9 @@ pandas = "*"
 CherryPy = "*"
 "Jinja2" = "*"
 requests = "*"
+celery = {extras = ["redis"],version = "*"}
+hiredis = "*"
+dataclasses = "*"
 
 [requires]
 python_version = "3.6"

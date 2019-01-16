@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bhavcopy/server
+    volumes:
+      - ./:/project
+    depends_on:
+      - redis
+    command:
+      - python
+      - app/cherrypy_views.py
+    ports:
+      - "5000:5000"
+
+  redis:
+    image: "redis:latest"
+    volumes:
+      - 'redis:/redis_data'
+
+  celery:
+    image: bhavcopy/server
+    depends_on:
+      - redis
+    volumes:
+      - ./:/project
+    command: celery -A app worker -l debug
+
+  beat:
+    image: bhavcopy/server
+    depends_on:
+      - redis
+      - celery
+    volumes:
+      - ./:/project
+    command: [celery, beat, --app=app, --loglevel=DEBUG]
+
+volumes:
+  redis:
